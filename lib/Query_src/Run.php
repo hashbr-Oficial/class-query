@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.2
+ * @version 3.3
  * @access public
  * @package Run
  * @subpackage Where
@@ -166,7 +166,7 @@ EOF;
         }
         $columns = implode(",\n\t", $_columns);
         $values = implode(",\n\t", $_values);
-        $table = $this->type == "mysql" ? `{$this->insert_into}` : $this->insert_into;
+        $table = $this->type == "mysql" ? "`{$this->insert_into}`" : $this->insert_into;
         return <<<EOF
 INSERT INTO {$table} ({$columns}) VALUES ({$values})
 EOF;
@@ -184,7 +184,7 @@ EOF;
         } else {
             $select = (string) in_array(str_replace("`", "", $this->select), $this->reserved_words) ? sprintf("`%s`", str_replace("`", "", $this->select)) : $this->select;
         }
-        $table = $this->type == "mysql" ? `{$this->from}` : $this->from;
+        $table = $this->type == "mysql" ? "`{$this->from}`" : $this->from;
         return <<<EOF
 SELECT {$select}
 FROM {$table}
@@ -323,3 +323,4 @@ EOF;
     }
 
 }
+

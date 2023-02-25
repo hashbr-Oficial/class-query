@@ -10,7 +10,7 @@ use Query_src\Config as Config;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.7
+ * @version 3.8
  * @access public
  * @package Query
  * @todo Finish the functions : SUM, DISTINCT, and commands of tools to database.
@@ -289,7 +289,12 @@ class Query extends Config {
                 $database = null;
                 $query = $this->database->prepare($this->SQL);
                 // close database connection
-                $query->execute();
+                if (!$query->execute()) {
+                    if ($this->debug)
+                        echo $this->SQL;
+                    exit;
+                }
+
                 // fetch query result
                 if (!empty($this->select) || !empty($this->customSQL))
                     $this->results = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -968,3 +973,4 @@ class Query extends Config {
     }
 
 }
+
