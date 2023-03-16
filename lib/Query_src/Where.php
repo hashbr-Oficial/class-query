@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.2
+ * @version 3.3
  * @access public
  * @package Where
  * @subpackage Pagination
@@ -96,11 +96,12 @@ class Where extends Pagination {
         if (!empty($this->where_like_binary)) {
             if (is_array($this->where_like_binary)) {
                 foreach ($this->where_like_binary as $k => $v) {
+                    $v = $this->safeValue($v);
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} BINARY '{$v}'";
+                    $where[] = "{$kk} {$function} BINARY \"{$v}\"";
                 }
             } else {
                 $where = $this->where_like_binary;
@@ -114,11 +115,12 @@ class Where extends Pagination {
         if (!empty($this->where_like_or)) {
             if (is_array($this->where_like_or)) {
                 foreach ($this->where_like_or as $k => $v) {
+                    $v = $this->safeValue($v);
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} '%{$v}%'";
+                    $where[] = "{$kk} {$function} \"%{$v}%\"";
                 }
             } else {
                 $where = $this->where_like_or;
@@ -132,11 +134,12 @@ class Where extends Pagination {
         if (!empty($this->where_like_before)) {
             if (is_array($this->where_like_before)) {
                 foreach ($this->where_like_before as $k => $v) {
+                    $v = $this->safeValue($v);
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} '%{$v}'";
+                    $where[] = "{$kk} {$function} \"%{$v}\"";
                 }
             } else {
                 $where = $this->where_like_before;
@@ -150,11 +153,12 @@ class Where extends Pagination {
         if (!empty($this->where_like_after)) {
             if (is_array($this->where_like_after)) {
                 foreach ($this->where_like_after as $k => $v) {
+                    $v = $this->safeValue($v);
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} '{$v}%'";
+                    $where[] = "{$kk} {$function} \"{$v}%\"";
                 }
             } else {
                 $where = $this->where_like_after;
@@ -168,11 +172,12 @@ class Where extends Pagination {
         if (!empty($this->where_like_both)) {
             if (is_array($this->where_like_both)) {
                 foreach ($this->where_like_both as $k => $v) {
+                    $v = $this->safeValue($v);
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} '%{$v}%'";
+                    $where[] = "{$kk} {$function} \"%{$v}%\"";
                 }
             } else {
                 $where = $this->where_like_both;
@@ -390,3 +395,4 @@ class Where extends Pagination {
     }
 
 }
+
