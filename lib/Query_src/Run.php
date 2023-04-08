@@ -9,12 +9,18 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 2.4
+ * @version 3.4
  * @access public
  * @package Run
  * @subpackage Where
  */
 class Run extends Where {
+
+    /**
+     * Set true for print SQL when happen  query errors
+     * @var boolean
+     */
+    protected $debug = true;
 
     /**
      * collection of words that cannot be used in the MYSQL
@@ -30,6 +36,9 @@ class Run extends Where {
      * @return \Query
      */
     protected function SQL() {
+        if (defined('DB_DEBUG'))
+            $this->debug = DB_DEBUG;
+
         if (!empty($this->select)) {
             self::calc_offset();
             return $this->run_select();
@@ -57,16 +66,30 @@ class Run extends Where {
      */
     public function get_num_rows() {
         $SQL = $this->run_select(TRUE);
-        try {
-            $query = $this->database->prepare($SQL);
-            // close database connection
-            $query->execute();
-            // fetch query result
-            return $query->rowCount();
-        } catch (Exception $e) {
-            $this->database = null;
-            print $SQL;
-            die("Query Error");
+        if ($this->type == "mysql") {
+            try {
+                $query = $this->database->prepare($SQL);
+                // close database connection
+                $query->execute();
+                // fetch query result
+                return $query->rowCount();
+            } catch (Exception $e) {
+                $this->database = null;
+                if ($this->debug)
+                    print $SQL;
+                die("Query Error");
+            }
+        }
+
+        if ($this->type == "postgresql") {
+            $query = pg_query($this->database, $SQL);
+            if (!$query) {
+                echo "An error occurred.\n";
+                if ($this->debug)
+                    echo $this->SQL;
+                exit;
+            }
+            return pg_num_rows($query);
         }
     }
 
@@ -108,19 +131,21 @@ class Run extends Where {
         } else {
             $set = (string) $this->set;
         }
-
+        $table = $this->type == "mysql" ? "`{$this->update}`" : $this->update;
+        $limit = $this->type == "mysql" ? $this->get_limit() : '';
         return <<<EOF
-UPDATE `{$this->update}` SET {$set}
+UPDATE {$table} SET {$set}
  {$this->get_inner_join()}
  {$this->get_left_join()}
  {$this->get_where()}
- {$this->get_limit()}
+ {$limit}
 EOF;
     }
 
     private function run_delete() {
+        $table = $this->type == "mysql" ? "`{$this->delete_from}`" : $this->delete_from;
         return <<<EOF
-DELETE FROM `{$this->delete_from}`
+DELETE FROM {$table}
  {$this->get_inner_join()}
  {$this->get_left_join()}
  {$this->get_where()}
@@ -141,8 +166,9 @@ EOF;
         }
         $columns = implode(",\n\t", $_columns);
         $values = implode(",\n\t", $_values);
+        $table = $this->type == "mysql" ? "`{$this->insert_into}`" : $this->insert_into;
         return <<<EOF
-INSERT INTO `{$this->insert_into}` ({$columns}) VALUES ({$values})
+INSERT INTO {$table} ({$columns}) VALUES ({$values})
 EOF;
     }
 
@@ -158,10 +184,10 @@ EOF;
         } else {
             $select = (string) in_array(str_replace("`", "", $this->select), $this->reserved_words) ? sprintf("`%s`", str_replace("`", "", $this->select)) : $this->select;
         }
-
+        $table = $this->type == "mysql" ? "`{$this->from}`" : $this->from;
         return <<<EOF
 SELECT {$select}
-FROM `{$this->from}` 
+FROM {$table}
  {$this->get_inner_join()}
  {$this->get_left_join()}
  {$this->get_where()}
@@ -178,9 +204,11 @@ EOF;
             if (is_array($this->group_by)) {
                 $newList = [];
                 foreach ($this->group_by as $group) {
-                    $parts = explode(" ", str_replace("`", '', $group));
+                    $parts = explode(".", str_replace("`", '', $group));
                     if (!empty($parts[0]) && !empty($parts[1]))
-                        $newList[] = "`{$parts[0]}`.{$parts[1]}";
+                        $newList[] = $this->type == "mysql" ? "`{$parts[0]}`.{$parts[1]}" : "{$parts[0]}.{$parts[1]}";
+                    elseif (!empty($parts[0]))
+                        $newList[] = $this->type == "mysql" ? "`{$parts[0]}`" : $parts[0];
                 }
                 $group_by = sprintf("GROUP BY %s", implode(",", $newList));
             } else {
@@ -211,8 +239,10 @@ EOF;
                 }
                 $order_by = sprintf("\n ORDER BY %s", implode(",", $newList));
             } else {
-                if ($this->order_by == "RAND()") {
+                if (strtoupper($this->order_by) == "RAND()") {
                     $order_by = "\n ORDER BY RAND()";
+                } elseif (strtoupper($this->order_by) == "RANDOM()") {
+                    $order_by = "\n ORDER BY RANDOM()";
                 } else {
                     $parts = explode(".", str_replace("`", '', $this->order_by));
                     if (!empty($parts[0]) && !empty($parts[1])) {
@@ -224,6 +254,9 @@ EOF;
                 }
             }
         }
+        if ($this->type == "postgresql")
+            $order_by = str_replace("`", "", $order_by);
+
         return $order_by;
     }
 
@@ -240,7 +273,10 @@ EOF;
         if (!empty($this->limit)) {
             if (!empty($this->page)) {
                 $offset = empty($this->offset) ? 0 : $this->offset;
-                $limit = "\n LIMIT {$offset},{$this->limit}";
+                if ($this->type == "postgresql")
+                    $limit = "\n OFFSET {$offset}\n LIMIT {$this->limit}";
+                else
+                    $limit = "\n LIMIT {$offset},{$this->limit}";
             } else {
                 $limit = "\n LIMIT {$this->limit}";
             }
