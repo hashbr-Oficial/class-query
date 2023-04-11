@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.3
+ * @version 3.4
  * @access public
  * @package Where
  * @subpackage Pagination
@@ -97,7 +97,7 @@ class Where extends Pagination {
             if (is_array($this->where_like_binary)) {
                 foreach ($this->where_like_binary as $k => $v) {
                     if (!empty($v) && !is_null($v))
-                        $v = $this->safeValue($v);
+                        $v = $this->safe_value_where_like($v);
                     else
                         $v = "";
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
@@ -119,7 +119,7 @@ class Where extends Pagination {
             if (is_array($this->where_like_or)) {
                 foreach ($this->where_like_or as $k => $v) {
                     if (!empty($v) && !is_null($v))
-                        $v = $this->safeValue($v);
+                        $v = $this->safe_value_where_like($v);
                     else
                         $v = "";
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
@@ -141,7 +141,7 @@ class Where extends Pagination {
             if (is_array($this->where_like_before)) {
                 foreach ($this->where_like_before as $k => $v) {
                     if (!empty($v) && !is_null($v))
-                        $v = $this->safeValue($v);
+                        $v = $this->safe_value_where_like($v);
                     else
                         $v = "";
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
@@ -163,7 +163,7 @@ class Where extends Pagination {
             if (is_array($this->where_like_after)) {
                 foreach ($this->where_like_after as $k => $v) {
                     if (!empty($v) && !is_null($v))
-                        $v = $this->safeValue($v);
+                        $v = $this->safe_value_where_like($v);
                     else
                         $v = "";
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
@@ -185,7 +185,7 @@ class Where extends Pagination {
             if (is_array($this->where_like_both)) {
                 foreach ($this->where_like_both as $k => $v) {
                     if (!empty($v) && !is_null($v))
-                        $v = $this->safeValue($v);
+                        $v = $this->safe_value_where_like($v);
                     else
                         $v = "";
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
@@ -219,7 +219,7 @@ class Where extends Pagination {
                     if ($this->type == "postgresql")
                         $kk = preg_match("/\./", $k) ? $k : ($res ? $k : "{$k}");
 
-                    $where[] = is_null($v) ? "{$kk} IS NULL" : "{$kk} = {$this->safeValue($v)}";
+                    $where[] = is_null($v) ? "{$kk} IS NULL" : "{$kk} = {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_equal_to;
@@ -234,7 +234,7 @@ class Where extends Pagination {
             if (is_array($this->where_less_than_or_equal_to)) {
                 foreach ($this->where_less_than_or_equal_to as $k => $v) {
                     $kk = preg_match("/\./", $k) ? $k : "`{$k}`";
-                    $where[] = "{$kk} <= {$this->safeValue($v)}";
+                    $where[] = "{$kk} <= {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_less_than_or_equal_to;
@@ -249,7 +249,7 @@ class Where extends Pagination {
             if (is_array($this->where_greater_than_or_equal_to)) {
                 foreach ($this->where_greater_than_or_equal_to as $k => $v) {
                     $kk = preg_match("/\./", $k) ? $k : "`{$k}`";
-                    $where[] = "{$kk} >= {$this->safeValue($v)}";
+                    $where[] = "{$kk} >= {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_greater_than_or_equal_to;
@@ -264,7 +264,7 @@ class Where extends Pagination {
             if (is_array($this->where_greater_than)) {
                 foreach ($this->where_greater_than as $k => $v) {
                     $kk = preg_match("/\./", $k) ? $k : "`{$k}`";
-                    $where[] = "{$kk} > {$this->safeValue($v)}";
+                    $where[] = "{$kk} > {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_greater_than;
@@ -279,7 +279,7 @@ class Where extends Pagination {
             if (is_array($this->where_less_than)) {
                 foreach ($this->where_less_than as $k => $v) {
                     $kk = preg_match("/\./", $k) ? $k : "`{$k}`";
-                    $where[] = "{$kk} < {$this->safeValue($v)}";
+                    $where[] = "{$kk} < {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_less_than;
@@ -294,7 +294,7 @@ class Where extends Pagination {
             if (is_array($this->where_not_equal_to)) {
                 foreach ($this->where_not_equal_to as $k => $v) {
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
-                    $where[] = is_null($v) ? "{$kk} IS NOT NULL" : "{$kk} != {$this->safeValue($v)}";
+                    $where[] = is_null($v) ? "{$kk} IS NOT NULL" : "{$kk} != {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_not_equal_to;
@@ -309,7 +309,7 @@ class Where extends Pagination {
             if (is_array($this->where_equal_or)) {
                 foreach ($this->where_equal_or as $k => $v) {
                     $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
-                    $where[] = is_null($v) ? "{$kk} IS NULL" : "{$kk} = {$this->safeValue($v)}";
+                    $where[] = is_null($v) ? "{$kk} IS NULL" : "{$kk} = {$this->safe_value($v)}";
                 }
             } else {
                 $where = $this->where_equal_or;
@@ -326,7 +326,7 @@ class Where extends Pagination {
                     $vv = [];
                     if (is_array($v)) {
                         foreach ($v as $value) {
-                            $vv[] = $this->safeValue($value);
+                            $vv[] = $this->safe_value($value);
                         }
                     } else {
                         $vv[] = $v;
@@ -350,7 +350,7 @@ class Where extends Pagination {
                     $vv = [];
                     if (is_array($v)) {
                         foreach ($v as $value) {
-                            $vv[] = $this->safeValue($value);
+                            $vv[] = $this->safe_value($value);
                         }
                     } else {
                         $vv[] = $v;
@@ -370,7 +370,38 @@ class Where extends Pagination {
      * @param mixed $v
      * @return mixed
      */
-    protected function safeValue($v) {
+    protected function safe_value_where_like($v) {
+        if ($this->type == "postgresql") {
+            if (is_bool($v))
+                return (int) $v;
+
+            if (is_string($v))
+                return sprintf("'%s'", str_replace("'", "''", $v));
+
+            if (is_int($v) || is_numeric($v))
+                return $v;
+
+            return $v;
+        }
+        if (is_bool($v))
+            return (int) $v;
+
+        if (is_numeric($v) && !in_array(substr($v, 0, 1), ["0", 0]))
+            return str_replace(",", ".", $v);
+
+        if (is_string(strval($v)))
+            return sprintf("%s", str_replace("'", "\'", $v));
+
+        return $v;
+    }
+
+    /**
+     * Safe value for SQL 
+     * 
+     * @param mixed $v
+     * @return mixed
+     */
+    protected function safe_value($v) {
         if ($this->type == "postgresql") {
             if (is_bool($v))
                 return (int) $v;
@@ -410,4 +441,3 @@ class Where extends Pagination {
     }
 
 }
-
