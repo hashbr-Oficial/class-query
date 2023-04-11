@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.4
+ * @version 3.5
  * @access public
  * @package Run
  * @subpackage Where
@@ -124,7 +124,7 @@ class Run extends Where {
         if (is_array($this->set)) {
             $_set = [];
             foreach ($this->set as $column => $value) {
-                $v = is_null($value) ? 'NULL' : $this->safeValue($value);
+                $v = is_null($value) ? 'NULL' : $this->safe_value($value);
                 $_set[] = "{$this->safeColumn($column)} = {$v}";
             }
             $set = implode(", \n\t", $_set);
@@ -160,7 +160,7 @@ EOF;
         if (is_array($this->set)) {
             foreach ($this->set as $column => $value) {
                 $_columns[] = $this->safeColumn($column);
-                $_values[] = is_null($value) ? 'NULL' : $this->safeValue($value);
+                $_values[] = is_null($value) ? 'NULL' : $this->safe_value($value);
                 #var_dump($value);
             }
         }
