@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.4
+ * @version 3.5
  * @access public
  * @package Where
  * @subpackage Pagination
@@ -35,6 +35,9 @@ class Where extends Pagination {
         if (!empty($where = $this->get_where_not_equal()))
             $wheres[] = $where;
 
+        if (!empty($where = $this->get_where_not_equal_or()))
+            $wheres[] = $where;
+        
         if (!empty($where = $this->get_where_not_in()))
             $wheres[] = $where;
 
@@ -301,6 +304,21 @@ class Where extends Pagination {
             }
         }
         return count($where) > 0 ? implode(" AND \n\t", $where) : (!is_array($where) ? $where : '');
+    }
+
+    private function get_where_not_equal_or() {
+        $where = [];
+        if (!empty($this->where_not_equal_or)) {
+            if (is_array($this->where_not_equal_or)) {
+                foreach ($this->where_not_equal_or as $k => $v) {
+                    $kk = $this->type == "postgresql" ? $k : (preg_match("/\./", $k) ? $k : "`{$k}`");
+                    $where[] = is_null($v) ? "{$kk} IS NOT NULL" : "{$kk} != {$this->safe_value($v)}";
+                }
+            } else {
+                $where = $this->where_not_equal_or;
+            }
+        }
+        return count($where) > 0 ? implode(" OR \n\t", $where) : (!is_array($where) ? $where : '');
     }
 
     private function get_where_equal_or() {
