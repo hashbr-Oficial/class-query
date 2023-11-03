@@ -9,7 +9,7 @@ namespace Query_src;
  * @author Bruno Ribeiro <bruno.espertinho@gmail.com>
  * @author Zachbor       <zachborboa@gmail.com>
  * 
- * @version 3.5
+ * @version 3.6
  * @access public
  * @package Where
  * @subpackage Pagination
@@ -129,7 +129,7 @@ class Where extends Pagination {
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} \"%{$v}%\"";
+                    $where[] = "{$kk} {$function} '%{$v}%'";
                 }
             } else {
                 $where = $this->where_like_or;
@@ -151,7 +151,7 @@ class Where extends Pagination {
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} \"%{$v}\"";
+                    $where[] = "{$kk} {$function} '%{$v}'";
                 }
             } else {
                 $where = $this->where_like_before;
@@ -173,7 +173,7 @@ class Where extends Pagination {
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} \"{$v}%\"";
+                    $where[] = "{$kk} {$function} '{$v}%'";
                 }
             } else {
                 $where = $this->where_like_after;
@@ -195,7 +195,7 @@ class Where extends Pagination {
                     $function = "LIKE";
                     if ($this->type == "postgresql")
                         $function = "ILIKE";
-                    $where[] = "{$kk} {$function} \"%{$v}%\"";
+                    $where[] = "{$kk} {$function} '%{$v}%'";
                 }
             } else {
                 $where = $this->where_like_both;
