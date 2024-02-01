@@ -35,6 +35,7 @@ class Config extends Run {
         'main' => array(
             'DB_HOST' => '',
             'DB_NAME' => '',
+            'DB_PORT'=> '3306',
             'DB_USER' => '',
             'DB_PASS' => '',
             'DB_CHARSET' => '',
@@ -53,7 +54,7 @@ class Config extends Run {
             $value = array_shift($this->Connections_Settings);
         else
             $value = $this->Connections_Settings[$database];
-
+        
         $this->type = $value['DATABASE'];
         if ($value['DATABASE'] == "mysql") {
             try {
@@ -62,7 +63,7 @@ class Config extends Run {
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_WARNING,
                     PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$value['DB_CHARSET']}"
                 );
-                $this->database = new PDO("mysql:host={$value['DB_HOST']};dbname={$value['DB_NAME']};port=3306;charset={$value['DB_CHARSET']}", $value['DB_USER'], $value['DB_PASS'], $options);
+                $this->database = new PDO("mysql:host={$value['DB_HOST']};dbname={$value['DB_NAME']};port={$value['DB_PORT']};charset={$value['DB_CHARSET']}", $value['DB_USER'], $value['DB_PASS'], $options);
             } catch (PDOException $e) {
                 // Echo custom message. Echo error code gives you some info.
                 echo 'Database connection can not be estabilished. Please try again later.' . '<br>';
@@ -73,7 +74,7 @@ class Config extends Run {
             }
         }
         if ($value['DATABASE'] == "postgresql") {
-            $this->database = pg_connect("host={$value['DB_HOST']} port=5432 dbname={$value['DB_NAME']} user={$value['DB_USER']} password={$value['DB_PASS']}");
+            $this->database = pg_connect("host={$value['DB_HOST']} port={$value['DB_PORT']} dbname={$value['DB_NAME']} user={$value['DB_USER']} password={$value['DB_PASS']}");
             if (!$this->database) {
                 echo 'Database connection can not be estabilished. Please try again later.' . '<br>';
                 exit;
@@ -92,6 +93,7 @@ class Config extends Run {
             $this->Connections_Settings['main'] = array(
                 'DB_HOST' => DB_HOST,
                 'DB_NAME' => DB_NAME,
+                'DB_PORT' => DB_PORT,
                 'DB_USER' => DB_USER,
                 'DB_PASS' => DB_PASS,
                 'DB_CHARSET' => DB_CHARSET,
